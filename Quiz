@@ -1,0 +1,24 @@
+Project Overview
+This project analyzes student performance in testline quizzes and predicts their NEET rank based on past quiz results and previous NEET exam scores. It extracts insights on topic strengths, weak areas, and performance trends.
+
+Key Features
+Fetch & Process Data from API endpoints.
+Analyze Performance across topics & difficulty levels.
+Generate Insights on weak areas & improvements.
+Predict NEET Rank using a Machine Learning model.
+
+Approach Description
+Step 1: Data Fetching & Preprocessing
+Fetch current quiz data and historical quiz data using requests.
+Clean & structure data using Pandas.
+Step 2: Performance Analysis
+Compute accuracy by topic & difficulty.
+Identify weak topics and improvement trends.
+Generate visual insights using Matplotlib/Seaborn.
+Step 3: Rank Prediction Model
+Train a Random Forest/XGBoost model on past NEET data.
+Use quiz scores, topic accuracy, and trends as features.
+Predict expected NEET rank.
+Step 4: Output & Reporting
+Display rank predictions & improvement suggestions.
+Optionally, deploy as a Flask/FastAPI web service.
