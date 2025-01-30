@@ -1,0 +1,61 @@
+import requests
+import pandas as pd
+import numpy as np
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_absolute_error
+
+
+CURRENT_QUIZ_API =  "https://your-api.com/current_quiz"
+HISTORICAL_QUIZ_API = "https://your-api.com/historical_quiz"
+
+def fetch_current_quiz():
+    response = requests.get(CURRENT_QUIZ_API)
+    return response.json() if response.status_code == 200 else None
+
+def fetch_historical_quiz():
+    response = requests.get(HISTORICAL_QUIZ_API)
+    return response.json() if response.status_code == 200 else None
+
+def process_data(historical_data):
+    df = pd.DataFrame(historical_data)
+
+    df['accuracy'] = df['correct_answers'] / df['total_questions']
+    
+    topic_accuracy = df.groupby('topic')['accuracy'].mean()
+    
+    return df, topic_accuracy
+
+def generate_insights(df, topic_accuracy):
+    insights = {
+        "weak_topics": topic_accuracy[topic_accuracy < 0.5].index.tolist(),
+        "strong_topics": topic_accuracy[topic_accuracy >= 0.8].index.tolist(),
+        "improvement_trend": df[['quiz_id', 'accuracy']].sort_values('quiz_id')
+    }
+    return insights
+
+def predict_rank(df, past_neet_ranks):
+    features = df[['accuracy', 'difficulty_level', 'time_spent']]
+    target = past_neet_ranks  # Historical NEET ranks
+    
+    X_train, X_test, y_train, y_test = train_test_split(features, target, test_size=0.2, random_state=42)
+    model = RandomForestRegressor(n_estimators=100, random_state=42)
+    model.fit(X_train, y_train)
+    
+    predictions = model.predict(X_test)
+    error = mean_absolute_error(y_test, predictions)
+    
+    return model, error
+
+if __name__ == "__main__":
+    current_quiz_data = fetch_current_quiz()
+    historical_quiz_data = fetch_historical_quiz()
+    
+    if historical_quiz_data:
+        df, topic_accuracy = process_data(historical_quiz_data)
+        insights = generate_insights(df, topic_accuracy)
+        print("Insights:", insights)
+        
+        past_neet_ranks = df['neet_rank']  
+        model, error = predict_rank(df, past_neet_ranks)
+        print(f"Model trained. Prediction Error: {error}")
